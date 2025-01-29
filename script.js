@@ -1,80 +1,72 @@
-// Select the form and results container
-const form = document.getElementById("calculate-form");
-const resultsContainer = document.getElementById("results");
+document.getElementById("calculate-form").addEventListener("submit", function(event) {
+  event.preventDefault();
 
-// Main calculation function
-function calculateYear(y, m = null) {
-  let isLeapYear = y % 4 === 0 && (y % 100 !== 0 || y % 400 === 0);
-  let baseResult;
+  const year = parseInt(document.getElementById("year").value);
+  const monthInput = document.getElementById("month").value;
+  const dayInput = document.getElementById("day").value;
+  
+  const month = monthInput ? parseInt(monthInput) : null;
+  const day = dayInput ? parseInt(dayInput) : null;
+
+  const resultText = calculateYear(year, month, day);
+  displayResult(resultText);
+});
+
+function calculateYear(y, m, d) {
   let output = `<strong>Calculating for year:</strong> ${y}<br>`;
+  let isLeapYear = (y - 3) % 4 === 0;
 
   if (isLeapYear) {
-    output += `<strong>${y} is a Leap Year (366 days).</strong><br>`;
-    baseResult = y; // Initial value for leap year
+      output += `<strong>${y} is a Leap Year (366 days).</strong><br>`;
+      let baseResult = y;
 
-    if (m === 1) {
-      const additionSequence = [5, 6, 11, 6, 5, 6, 11, 6, 5, 6, 11, 6];
-      const results = [];
-      for (let i of additionSequence) {
-        baseResult += i;
-        results.push(baseResult);
+      if (m === 1) {
+          output += getAdditionalYears(baseResult, [5, 6, 11, 6, 5, 6, 11, 6, 5, 6, 11, 6], "January");
+      } else if (m === 2) {
+          if (d === 29) {
+              output += getAdditionalYears(baseResult, [28, 28, 28, 28], "February 29");
+          } else {
+              output += getAdditionalYears(baseResult, [5, 6, 11, 6, 5, 6, 11, 6, 5, 6, 11, 6], "February (excluding 29)");
+          }
       }
-      output += `Additional years for January in Leap Year: ${results.join(", ")}<br>`;
-    } else if (m === 2) {
-      const additionSequence = [5, 6, 11, 6, 5, 6, 11, 6, 5, 6, 11, 6];
-      const results = [];
-      for (let i of additionSequence) {
-        baseResult += i;
-        results.push(baseResult);
-      }
-      output += `Additional years for February: ${results.join(", ")}<br>`;
-    }
   } else {
-    const xMod4 = y % 4;
-    let t;
-    const additionSequence = [5, 6, 11, 6, 5, 6, 11, 6, 5, 6, 11, 6];
-    if (xMod4 === 0) {
-      t = 6;
-    } else if (xMod4 === 1) {
-      t = 11;
-    } else if (xMod4 === 2) {
-      t = 5;
-    } else {
-      t = 6;
-    }
-    baseResult = y + t;
-    const results = [];
-    for (let i of additionSequence) {
-      baseResult += i;
-      results.push(baseResult);
-    }
-    output += `Additional years for non-Leap Year: ${results.join(", ")}<br>`;
-  }
-
-  if (m !== null) {
-    if (m >= 1 && m <= 12) {
-      output += `<strong>Month provided:</strong> ${m}<br>`;
-    } else {
-      output += `<strong>Invalid month:</strong> ${m}. Month should be between 1 and 12.<br>`;
-    }
+      output += calculateNonLeapYear(y);
   }
 
   return output;
 }
 
-// Form submission handler
-form.addEventListener("submit", (event) => {
-  event.preventDefault();
+function calculateNonLeapYear(y) {
+  let xMod4 = y % 4;
+  let output = `<strong>${y} is NOT a Leap Year.</strong><br>`;
+  let baseResult = y;
+  let additionSequence;
 
-  // Get inputs
-  const year = parseInt(document.getElementById("year").value);
-  const monthInput = document.getElementById("month").value;
-  const month = monthInput ? parseInt(monthInput) : null;
+  if (xMod4 === 0) {
+      additionSequence = [6, 5, 6, 11, 6, 5, 6, 11, 6, 5, 6, 11];
+  } else if (xMod4 === 1) {
+      additionSequence = [11, 6, 5, 6, 11, 6, 5, 6, 11, 6, 5, 6];
+  } else if (xMod4 === 2) {
+      additionSequence = [5, 6, 11, 6, 5, 6, 11, 6, 5, 6, 11, 6];
+  } else {
+      additionSequence = [6, 11, 6, 5, 6, 11, 6, 5, 6, 11, 6, 5];
+  }
 
-  // Calculate results
-  const results = calculateYear(year, month);
+  output += getAdditionalYears(baseResult, additionSequence, "Non-Leap Year");
+  return output;
+}
 
-  // Display results
-  resultsContainer.innerHTML = results;
+function getAdditionalYears(baseResult, additionSequence, category) {
+  let results = [];
+  for (let i of additionSequence) {
+      baseResult += i;
+      results.push(baseResult);
+  }
+  return `<strong>${category} - Additional Years:</strong> ${results.join(", ")}<br>`;
+}
+
+function displayResult(resultText) {
+  const resultsContainer = document.getElementById("results");
+  resultsContainer.innerHTML = resultText;
   resultsContainer.style.display = "block";
-});
+}
