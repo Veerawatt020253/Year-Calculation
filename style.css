@@ -1,14 +1,9 @@
 body {
   background-color: #f8f9fa;
+  font-family: 'Prompt', sans-serif;
 }
 
 .card {
   max-width: 500px;
   margin: auto;
-}
-
-.alert {
-  max-width: 500px;
-  margin: auto;
-  text-align: center;
 }

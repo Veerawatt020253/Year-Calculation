@@ -1,72 +1,45 @@
-document.getElementById("calculate-form").addEventListener("submit", function(event) {
-  event.preventDefault();
+document.getElementById("dateForm").addEventListener("submit", function (event) {
+    event.preventDefault();
 
-  const year = parseInt(document.getElementById("year").value);
-  const monthInput = document.getElementById("month").value;
-  const dayInput = document.getElementById("day").value;
-  
-  const month = monthInput ? parseInt(monthInput) : null;
-  const day = dayInput ? parseInt(dayInput) : null;
+    let d = parseInt(document.getElementById("day").value);
+    let m = parseInt(document.getElementById("month").value);
+    let y = parseInt(document.getElementById("year").value);
 
-  const resultText = calculateYear(year, month, day);
-  displayResult(resultText);
+    if (y < 1000) {
+        alert("กรุณากรอกปีเป็น ค.ศ. (เช่น 2024)");
+        return;
+    }
+
+    let remainder = y % 4;
+    let baseResult = y;
+    let additionSequence = [];
+
+    if (d === 29 && m === 2) {
+        additionSequence = [28, 28, 28, 28];
+    } else if (m === 1 || m === 2) {
+        if (remainder === 0) additionSequence = [6, 11, 6, 5, 6, 11, 6, 5];
+        else if (remainder === 1) additionSequence = [6, 5, 6, 11, 6, 5, 6, 11];
+        else if (remainder === 2) additionSequence = [11, 6, 5, 6, 11, 6, 5, 6];
+        else if (remainder === 3) additionSequence = [5, 6, 11, 6, 5, 6, 11, 6];
+    } else {
+        if (remainder === 0) additionSequence = [6, 5, 6, 11, 6, 5, 6, 11];
+        else if (remainder === 1) additionSequence = [11, 6, 5, 6, 11, 6, 5, 6];
+        else if (remainder === 2) additionSequence = [5, 6, 11, 6, 5, 6, 11, 6];
+        else if (remainder === 3) additionSequence = [6, 11, 6, 5, 6, 11, 6, 5];
+    }
+
+    let results = [];
+    for (let i of additionSequence) {
+        baseResult += i;
+        results.push(baseResult);
+    }
+
+    let resultList = document.getElementById("resultList");
+    resultList.innerHTML = "";
+    results.forEach(year => {
+        let listItem = document.createElement("li");
+        listItem.className = "list-group-item";
+        listItem.textContent = year;
+        resultList.appendChild(listItem);
+    });
 });
-
-function calculateYear(y, m, d) {
-  let output = `<strong>Calculating for year:</strong> ${y}<br>`;
-  let isLeapYear = (y - 3) % 4 === 0;
-
-  if (isLeapYear) {
-      output += `<strong>${y} is a Leap Year (366 days).</strong><br>`;
-      let baseResult = y;
-
-      if (m === 1) {
-          output += getAdditionalYears(baseResult, [5, 6, 11, 6, 5, 6, 11, 6, 5, 6, 11, 6], "January");
-      } else if (m === 2) {
-          if (d === 29) {
-              output += getAdditionalYears(baseResult, [28, 28, 28, 28], "February 29");
-          } else {
-              output += getAdditionalYears(baseResult, [5, 6, 11, 6, 5, 6, 11, 6, 5, 6, 11, 6], "February (excluding 29)");
-          }
-      }
-  } else {
-      output += calculateNonLeapYear(y);
-  }
-
-  return output;
-}
-
-function calculateNonLeapYear(y) {
-  let xMod4 = y % 4;
-  let output = `<strong>${y} is NOT a Leap Year.</strong><br>`;
-  let baseResult = y;
-  let additionSequence;
-
-  if (xMod4 === 0) {
-      additionSequence = [6, 5, 6, 11, 6, 5, 6, 11, 6, 5, 6, 11];
-  } else if (xMod4 === 1) {
-      additionSequence = [11, 6, 5, 6, 11, 6, 5, 6, 11, 6, 5, 6];
-  } else if (xMod4 === 2) {
-      additionSequence = [5, 6, 11, 6, 5, 6, 11, 6, 5, 6, 11, 6];
-  } else {
-      additionSequence = [6, 11, 6, 5, 6, 11, 6, 5, 6, 11, 6, 5];
-  }
-
-  output += getAdditionalYears(baseResult, additionSequence, "Non-Leap Year");
-  return output;
-}
-
-function getAdditionalYears(baseResult, additionSequence, category) {
-  let results = [];
-  for (let i of additionSequence) {
-      baseResult += i;
-      results.push(baseResult);
-  }
-  return `<strong>${category} - Additional Years:</strong> ${results.join(", ")}<br>`;
-}
-
-function displayResult(resultText) {
-  const resultsContainer = document.getElementById("results");
-  resultsContainer.innerHTML = resultText;
-  resultsContainer.style.display = "block";
-}
